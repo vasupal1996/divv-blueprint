@@ -2,8 +2,9 @@ package logger
 
 import (
 	"context"
-	"fmt"
+	"divvy-go-app/schema"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/rs/zerolog"
 )
 
@@ -12,18 +13,28 @@ type TracingHook struct{}
 func (h TracingHook) Run(e *zerolog.Event, level zerolog.Level, msg string) {
 	ctx := e.GetCtx()
 	tracingID := getSpanIdFromContext(ctx) // as per your tracing framework
-	e.Interface("tracingID", tracingID)
+	if tracingID != nil {
+		e.Interface(schema.RequestIDKey, tracingID)
+	}
 }
 
 func getSpanIdFromContext(ctx context.Context) interface{} {
-	return ctx.Value("tracing-id")
+	id := ctx.Value(ctx.Value(schema.RequestIDKey))
+	return id
 }
 
 type SentryHook struct{}
 
 func (h SentryHook) Run(e *zerolog.Event, level zerolog.Level, msg string) {
+	ctx := e.GetCtx()
 	if level == zerolog.WarnLevel {
-		fmt.Println("SENDING TO SENTRY")
-		// TODO: Add code to send the log to sentry
+		sentry.WithScope(func(scope *sentry.Scope) {
+			scope.SetContext("ctx", sentry.Context{
+				schema.RequestIDKey:   ctx.Value(schema.RequestIDKey),
+				schema.SentryExtraCtx: ctx.Value(schema.SentryExtraCtx),
+			})
+			scope.SetLevel(sentry.LevelWarning)
+			sentry.CaptureMessage(msg)
+		})
 	}
 }

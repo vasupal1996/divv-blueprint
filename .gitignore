@@ -1,2 +1,4 @@
-!conf/sample.json
+conf/*
 .vscode/
+
+!conf/sample.json

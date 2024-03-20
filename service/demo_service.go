@@ -1,10 +1,10 @@
-//go:generate $GOPATH/bin/mockgen -destination=../mock/mock_demo_service.go -package=mock divvy-go-app/service DemoService
+//go:generate $GOPATH/bin/mockgen -destination=../mock/mock_demo_service.go -package=mock go-app/service DemoService
 package service
 
 import (
 	"context"
-	"divvy-go-app/model"
-	"divvy-go-app/schema"
+	"go-app/model"
+	"go-app/schema"
 
 	"time"
 

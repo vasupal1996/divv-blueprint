@@ -1,7 +1,7 @@
 package db
 
 import (
-	"divvy-go-app/internals/mongodb"
+	"go-app/internals/mongodb"
 )
 
 type DB interface {

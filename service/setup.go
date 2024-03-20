@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"divvy-go-app/internals/config"
+	"go-app/internals/config"
 
 	"github.com/rs/zerolog"
 )

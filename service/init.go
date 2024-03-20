@@ -1,11 +1,11 @@
-//go:generate mockgen -destination=../mock/mock_service.go -package=mock divvy-go-app/service Service
+//go:generate mockgen -destination=../mock/mock_service.go -package=mock go-app/service Service
 package service
 
 import (
 	"context"
-	"divvy-go-app/internals/config"
-	"divvy-go-app/internals/db"
-	"divvy-go-app/internals/logger"
+	"go-app/internals/config"
+	"go-app/internals/db"
+	"go-app/internals/logger"
 	"sync"
 
 	"github.com/rs/zerolog"

@@ -1,10 +1,10 @@
 package router
 
 import (
-	"divvy-go-app/internals/config"
-	"divvy-go-app/internals/logger"
-	"divvy-go-app/schema"
-	"divvy-go-app/service"
+	"go-app/internals/config"
+	"go-app/internals/logger"
+	"go-app/schema"
+	"go-app/service"
 
 	"github.com/goccy/go-json"
 	"github.com/gofiber/contrib/fibersentry"

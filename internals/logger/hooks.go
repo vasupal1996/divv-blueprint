@@ -2,7 +2,7 @@ package logger
 
 import (
 	"context"
-	"divvy-go-app/schema"
+	"go-app/schema"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/rs/zerolog"

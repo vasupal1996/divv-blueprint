@@ -2,8 +2,8 @@ package router
 
 import (
 	"context"
-	"divvy-go-app/schema"
 	"fmt"
+	"go-app/schema"
 
 	"github.com/gofiber/fiber/v2"
 )

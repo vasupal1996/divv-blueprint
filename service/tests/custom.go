@@ -2,7 +2,7 @@ package service_test
 
 import (
 	"context"
-	"divvy-go-app/internals/mongodb"
+	"go-app/internals/mongodb"
 	"testing"
 	"time"
 

@@ -2,12 +2,12 @@ package service_test
 
 import (
 	"context"
-	"divvy-go-app/internals/config"
-	"divvy-go-app/internals/db"
-	"divvy-go-app/internals/logger"
-	"divvy-go-app/internals/mongodb"
-	"divvy-go-app/mock"
-	"divvy-go-app/service"
+	"go-app/internals/config"
+	"go-app/internals/db"
+	"go-app/internals/logger"
+	"go-app/internals/mongodb"
+	"go-app/mock"
+	"go-app/service"
 
 	"fmt"
 	"os"

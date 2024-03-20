@@ -2,10 +2,10 @@ package service_test
 
 import (
 	"context"
-	"divvy-go-app/internals/config"
-	"divvy-go-app/model"
-	"divvy-go-app/schema"
-	"divvy-go-app/service"
+	"go-app/internals/config"
+	"go-app/model"
+	"go-app/schema"
+	"go-app/service"
 	"sync"
 
 	"fmt"

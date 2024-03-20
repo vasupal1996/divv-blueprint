@@ -1,17 +1,28 @@
 {
     "app_config": {
-
+        "service_config": {
+            "demo_service_config": {
+                "some_additional_data": "yup! working"
+            }
+        }
     },
     "mongo_db_config": {
-
+        "scheme": "mongodb+srv",
+        "host": "cluster0.o0rr25f.mongodb.net",
+        "username": "go-app-1",
+        "password": "YSVToJgFJGeh7tsg",
+        "app-name": "goapp-app-local-1",
+        "read_pref": "primary",
+        "replica_set": ""
     },
     "web_server_config": {
-
+        "host": "0.0.0.0",
+        "port": 8000
     },
     "router_config": {
-
+        "enable_sentry": false
     },
     "sentry_config": {
-        
+        "enable_sentry": false
     }
 }

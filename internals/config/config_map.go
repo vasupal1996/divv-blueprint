@@ -1,6 +1,8 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Config struct {
 	AppConfig       *AppConfig       `mapstructure:"app_config"`

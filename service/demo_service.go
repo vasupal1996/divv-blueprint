@@ -3,8 +3,10 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"go-app/model"
 	"go-app/schema"
+	"io"
 
 	"time"
 
@@ -19,6 +21,7 @@ type DemoService interface {
 	DemoFunc(ctx context.Context) string
 	SentryDemoFunc(ctx context.Context) string
 	InsertOne(ctx context.Context, opts *schema.InsertOneOpts) (primitive.ObjectID, error)
+	CallAPIForMock(ctx context.Context, url string) (bool, error)
 
 	// MongoDB Related Operations
 	Account_Create(ctx context.Context, opts *schema.Account_CreateOpts) (*schema.Account_CreateResp, error)
@@ -87,20 +90,24 @@ func (dsi *DemoServiceImpl) Transaction_Create(ctx context.Context, opts *schema
 }
 
 func (dsi *DemoServiceImpl) registerTransaction(ctx context.Context, opts *schema.Transaction_CreateOpts) error {
+
 	session, err := dsi.Service.MongoDB().Cli().StartSession()
 	if err != nil {
 		dsi.Logger.Err(err).Msg("failed to start session for transaction")
 		return errors.Wrap(err, "failed to start session for transaction")
 	}
+
 	// Defers ending the session after the transaction is committed or ended
 	defer session.EndSession(ctx)
 
 	_, err = session.WithTransaction(ctx, func(sessionContext mongo.SessionContext) (interface{}, error) {
+
 		var creditAccount model.Account
 		res := dsi.Service.MongoDB().Cli().Database(model.BankDB).Collection(model.AccountColl).FindOne(
 			sessionContext,
 			bson.M{"_id": opts.CreditAccountID},
 		)
+
 		if err := res.Decode(&creditAccount); err != nil {
 			dsi.Logger.Err(err).Ctx(ctx).Interface("opts", opts).Msg("failed to credit get account")
 			return nil, errors.New("invalid credit account")
@@ -226,4 +233,17 @@ func (dsi *DemoServiceImpl) GetAccountDetailWithTransactions(ctx context.Context
 	accountResp.Transactions = transactions
 
 	return &accountResp, nil
+}
+
+func (dsi *DemoServiceImpl) CallAPIForMock(ctx context.Context, url string) (bool, error) {
+	print(dsi.DemoFunc(ctx))
+
+	resp, err := dsi.Service.GetHTTPService().Get(url)
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+	fmt.Println(string(body))
+	return true, nil
 }

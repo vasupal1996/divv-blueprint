@@ -51,6 +51,21 @@ func (mr *MockDemoServiceMockRecorder) Account_Create(arg0, arg1 interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Account_Create", reflect.TypeOf((*MockDemoService)(nil).Account_Create), arg0, arg1)
 }
 
+// CallAPIForMock mocks base method.
+func (m *MockDemoService) CallAPIForMock(arg0 context.Context, arg1 string) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CallAPIForMock", arg0, arg1)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CallAPIForMock indicates an expected call of CallAPIForMock.
+func (mr *MockDemoServiceMockRecorder) CallAPIForMock(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CallAPIForMock", reflect.TypeOf((*MockDemoService)(nil).CallAPIForMock), arg0, arg1)
+}
+
 // DemoFunc mocks base method.
 func (m *MockDemoService) DemoFunc(arg0 context.Context) string {
 	m.ctrl.T.Helper()

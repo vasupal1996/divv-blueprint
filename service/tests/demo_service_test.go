@@ -1,11 +1,15 @@
-package service_test
+package test_service
 
 import (
+	"bytes"
 	"context"
 	"go-app/internals/config"
+	"go-app/mock"
 	"go-app/model"
 	"go-app/schema"
 	"go-app/service"
+	"io"
+	"net/http"
 	"sync"
 
 	"fmt"
@@ -53,7 +57,7 @@ func TestDemoServiceImpl_Account_Create(t *testing.T) {
 			fields: fields{
 				Ctx:     context.TODO(),
 				Logger:  &zerolog.Logger{},
-				Config:  config.GetConfigFromFile().AppConfig.ServiceConfig.DemoServiceConfig,
+				Config:  config.GetTestConfigFromFile().AppConfig.ServiceConfig.DemoServiceConfig,
 				Service: tsi.Service,
 			},
 			args: args{
@@ -218,7 +222,7 @@ func TestDemoServiceImpl_Transaction_Create(t *testing.T) {
 			fields: fields{
 				Ctx:     context.TODO(),
 				Logger:  &zerolog.Logger{},
-				Config:  config.GetConfigFromFile().AppConfig.ServiceConfig.DemoServiceConfig,
+				Config:  config.GetTestConfigFromFile().AppConfig.ServiceConfig.DemoServiceConfig,
 				Service: tsi.Service,
 			},
 			args: args{
@@ -507,7 +511,7 @@ func TestDemoServiceImpl_Transaction_Create_ACID(t *testing.T) {
 			fields: fields{
 				Ctx:     context.TODO(),
 				Logger:  &zerolog.Logger{},
-				Config:  config.GetConfigFromFile().AppConfig.ServiceConfig.DemoServiceConfig,
+				Config:  config.GetTestConfigFromFile().AppConfig.ServiceConfig.DemoServiceConfig,
 				Service: tsi.Service,
 			},
 			args: args{
@@ -942,7 +946,6 @@ func TestDemoServiceImpl_Transaction_Create_ACID(t *testing.T) {
 	assert.Equal(t, float32(1000), updatedDemoDebitAccount.Balance)
 }
 
-// TODO: Find a way to test AC[I->Isolation]D unit testing
 func TestDemoServiceImpl_Transaction_Create_ACID_2(t *testing.T) {
 
 	tsi := NewTestService(t)
@@ -960,11 +963,10 @@ func TestDemoServiceImpl_Transaction_Create_ACID_2(t *testing.T) {
 	}
 
 	type TC struct {
-		name    string
-		fields  fields
-		args    args
-		wantErr bool
-		// err       error
+		name      string
+		fields    fields
+		args      args
+		wantErr   bool
 		prepare   func(tt *TC)
 		validate  func(tt *TC)
 		Timestamp time.Time
@@ -985,7 +987,7 @@ func TestDemoServiceImpl_Transaction_Create_ACID_2(t *testing.T) {
 			fields: fields{
 				Ctx:     context.TODO(),
 				Logger:  &zerolog.Logger{},
-				Config:  config.GetConfigFromFile().AppConfig.ServiceConfig.DemoServiceConfig,
+				Config:  config.GetTestConfigFromFile().AppConfig.ServiceConfig.DemoServiceConfig,
 				Service: tsi.Service,
 			},
 			args: args{
@@ -1012,19 +1014,14 @@ func TestDemoServiceImpl_Transaction_Create_ACID_2(t *testing.T) {
 			}
 
 			tt.args.opts.Amount = float32(transaction_amount)
-			wg.Add(1)
-
-			// var i int = 0
 			for i := 0; i < iterations; i++ {
+				wg.Add(1)
 				go func(j int) {
 					defer wg.Done()
-					fmt.Printf("Running Transaction No:  %d\n", j)
 					err := dsi.Transaction_Create(tt.args.ctx, tt.args.opts)
-					fmt.Printf("Done Transaction No:  %d\n", j)
 					assert.Nil(t, err)
 				}(i)
 			}
-
 		})
 	}
 
@@ -1044,7 +1041,7 @@ func TestDemoServiceImpl_Transaction_Create_ACID_2(t *testing.T) {
 	assert.Nil(t, err)
 
 	assert.Equal(t, float32(0), updatedDemoCreditAccount.Balance)
-	assert.Equal(t, float32(1000), updatedDemoDebitAccount.Balance)
+	assert.Equal(t, float32(max_amount), updatedDemoDebitAccount.Balance)
 }
 
 func TestDemoServiceImpl_GetAccountDetailWithTransactions(t *testing.T) {
@@ -1080,7 +1077,7 @@ func TestDemoServiceImpl_GetAccountDetailWithTransactions(t *testing.T) {
 			fields: fields{
 				Ctx:     context.TODO(),
 				Logger:  &zerolog.Logger{},
-				Config:  config.GetConfigFromFile().AppConfig.ServiceConfig.DemoServiceConfig,
+				Config:  config.GetTestConfigFromFile().AppConfig.ServiceConfig.DemoServiceConfig,
 				Service: tsi.Service,
 			},
 			args: args{
@@ -1144,5 +1141,81 @@ func TestDemoServiceImpl_GetAccountDetailWithTransactions(t *testing.T) {
 			tt.validate(&tt, got)
 		})
 	}
+}
 
+func TestDemoServiceImpl_CallAPIForMock(t *testing.T) {
+
+	tsi := NewTestService(t)
+	defer tsi.Clean()
+
+	type fields struct {
+		Ctx     context.Context
+		Logger  *zerolog.Logger
+		Config  *config.DemoServiceConfig
+		Service service.Service
+	}
+	type args struct {
+		ctx context.Context
+		url string
+	}
+
+	type TC struct {
+		name    string
+		fields  fields
+		args    args
+		want    bool
+		wantErr bool
+		prepare func(tt *TC)
+	}
+
+	tests := []TC{
+		{
+			name: "mock success",
+			args: args{
+				ctx: context.TODO(),
+				url: "https://google.com",
+			},
+			fields: fields{
+				Ctx:     context.TODO(),
+				Logger:  &zerolog.Logger{},
+				Config:  config.GetTestConfigFromFile().AppConfig.ServiceConfig.DemoServiceConfig,
+				Service: tsi.Service,
+			},
+			wantErr: false,
+			want:    true,
+			prepare: func(tt *TC) {
+				mockHttpService := tt.fields.Service.GetHTTPService().(*mock.MockHTTP)
+				mockHttpService.EXPECT().Get(tt.args.url).Return(
+					&http.Response{Status: "200 OK",
+						StatusCode:    200,
+						Proto:         "HTTP/1.1",
+						ProtoMajor:    1,
+						ProtoMinor:    1,
+						Body:          io.NopCloser(bytes.NewBufferString("Hello world")),
+						ContentLength: int64(len("Hello world")),
+						Header:        make(http.Header, 0)},
+					nil).
+					Times(1)
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dsi := &service.DemoServiceImpl{
+				Ctx:     tt.fields.Ctx,
+				Logger:  tt.fields.Logger,
+				Config:  tt.fields.Config,
+				Service: tt.fields.Service,
+			}
+			tt.prepare(&tt)
+			got, err := dsi.CallAPIForMock(tt.args.ctx, tt.args.url)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("DemoServiceImpl.CallAPIForMock() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("DemoServiceImpl.CallAPIForMock() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

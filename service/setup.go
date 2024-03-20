@@ -31,3 +31,10 @@ func NewDemoService(opts *DemoServiceOpts) DemoService {
 	}
 	return &ds
 }
+
+type HTTPImpl struct{}
+
+func NewHttp() HTTP {
+	h := HTTPImpl{}
+	return &h
+}

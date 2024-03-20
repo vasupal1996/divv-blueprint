@@ -1,4 +1,4 @@
-package service_test
+package test_service
 
 import (
 	"context"
@@ -44,6 +44,7 @@ func NewTestService(t *testing.T) *TestService {
 	}
 
 	s.DemoService = mock.NewMockDemoService(ctrl)
+	s.HTTPService = mock.NewMockHTTP(ctrl)
 
 	mongoDBServer := NewMockMongoDB()
 	mockMongoDB, err := mongodb.NewMockMongoDB(mongoDBServer.URI())

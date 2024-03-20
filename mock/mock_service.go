@@ -36,9 +36,11 @@ func (m *MockService) EXPECT() *MockServiceMockRecorder {
 }
 
 // Close mocks base method.
-func (m *MockService) Close() {
+func (m *MockService) Close() error {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "Close")
+	ret := m.ctrl.Call(m, "Close")
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Close indicates an expected call of Close.
@@ -59,6 +61,20 @@ func (m *MockService) GetDemoService() service.DemoService {
 func (mr *MockServiceMockRecorder) GetDemoService() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDemoService", reflect.TypeOf((*MockService)(nil).GetDemoService))
+}
+
+// GetHTTPService mocks base method.
+func (m *MockService) GetHTTPService() service.HTTP {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetHTTPService")
+	ret0, _ := ret[0].(service.HTTP)
+	return ret0
+}
+
+// GetHTTPService indicates an expected call of GetHTTPService.
+func (mr *MockServiceMockRecorder) GetHTTPService() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetHTTPService", reflect.TypeOf((*MockService)(nil).GetHTTPService))
 }
 
 // MongoDB mocks base method.

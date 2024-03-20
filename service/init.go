@@ -1,4 +1,4 @@
-//go:generate mockgen -destination=../mock/mock_service.go -package=mock go-app/service Service
+//go:generate $GOPATH/bin/mockgen -destination=../mock/mock_service.go -package=mock go-app/service Service
 package service
 
 import (
@@ -14,6 +14,7 @@ import (
 type Service interface {
 	Close() error
 	GetDemoService() DemoService
+	GetHTTPService() HTTP
 
 	db.DB
 }
@@ -27,6 +28,7 @@ type ServiceImpl struct {
 
 	db.DB
 	DemoService DemoService
+	HTTPService HTTP
 }
 
 type ServiceOpts struct {
@@ -75,10 +77,16 @@ func (si *ServiceImpl) GetDemoService() DemoService {
 	return si.DemoService
 }
 
+func (si *ServiceImpl) GetHTTPService() HTTP {
+	return si.HTTPService
+}
+
 func (si *ServiceImpl) setup(opts *ServiceOpts) {
 	si.DemoService = NewDemoService(&DemoServiceOpts{
 		Config:  opts.Config.DemoServiceConfig,
 		Logger:  si.AbstractLogger.CreateSubLogger(si.Logger, "demo-service"),
 		Service: si,
 	})
+
+	si.HTTPService = NewHttp()
 }

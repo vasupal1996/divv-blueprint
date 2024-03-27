@@ -1,11 +1,15 @@
 package router
 
 import (
-	"divvy-go-app/internals/config"
-	"divvy-go-app/internals/logger"
-	"divvy-go-app/schema"
-	"divvy-go-app/service"
+	"go-app/internals/config"
+	"go-app/internals/logger"
+	"go-app/schema"
+	"go-app/service"
+	"reflect"
+	"strings"
 
+	"github.com/go-playground/locales/en"
+	"github.com/go-playground/validator/v10"
 	"github.com/goccy/go-json"
 	"github.com/gofiber/contrib/fibersentry"
 	"github.com/gofiber/contrib/fiberzerolog"
@@ -15,6 +19,9 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/rs/zerolog"
+
+	ut "github.com/go-playground/universal-translator"
+	en_translations "github.com/go-playground/validator/v10/translations/en"
 )
 
 var RequestFieldsToLog = []string{
@@ -45,10 +52,11 @@ var RequestFieldsToLog = []string{
 
 type Router struct {
 	*fiber.App
-	Logger *zerolog.Logger
-	Config *config.RouterConfig
+	Logger    *zerolog.Logger
+	Config    *config.RouterConfig
+	Validator *CustomValidator
 
-	demoService service.DemoService
+	DemoService service.DemoService
 }
 
 type RouterOpts struct {
@@ -99,12 +107,13 @@ func NewRouter(opts *RouterOpts) *Router {
 	r := Router{
 		App:         fiber.New(fiberConfig),
 		Logger:      lr,
-		demoService: opts.DemoService,
 		Config:      opts.RouterConfig,
+		Validator:   NewValidator(),
+		DemoService: opts.DemoService,
 	}
 
 	r.enableMiddlewares(&middlewareConfig{logger: rr})
-	r.registerRoutes()
+	r.RegisterRoutes()
 	return &r
 }
 
@@ -147,3 +156,60 @@ func (r *Router) enableMiddlewares(config *middlewareConfig) {
 // 	}
 // 	return c.Next()
 // }
+
+// CustomValidator container validator library and transaltor
+type CustomValidator struct {
+	validator  *validator.Validate
+	translator *ut.Translator
+}
+
+// NewValidation create new Validator struct instance
+func NewValidator() *CustomValidator {
+	v := &CustomValidator{
+		validator: validator.New(),
+	}
+	trans := initializeTranslation(v.validator)
+	v.translator = trans
+	registerFunc(v.validator)
+	return v
+}
+
+// Initialize initializes and returns the UniversalTranslator instance for the application
+func initializeTranslation(validate *validator.Validate) *ut.Translator {
+
+	// initialize translator
+	en := en.New()
+	uni := ut.New(en, en)
+
+	trans, _ := uni.GetTranslator("en")
+	// initialize translations
+	en_translations.RegisterDefaultTranslations(validate, trans)
+	return &trans
+}
+
+func registerFunc(validate *validator.Validate) {
+	// register function to get tag name from json tags.
+	validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
+		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+		if name == "-" {
+			return ""
+		}
+		return name
+	})
+}
+
+// Validate validates the struct
+// Note: do not pass slice of struct
+func (cv *CustomValidator) Validate(form interface{}) []ErrorResp {
+	var validationErrs []ErrorResp
+	if err := cv.validator.Struct(form); err != nil {
+		for _, e := range err.(validator.ValidationErrors) {
+			var ve ErrorResp
+			ve.ErrField = strings.SplitAfterN(e.Namespace(), ".", 2)[1]
+			ve.ErrMsg = e.Translate(*cv.translator)
+			ve.ErrCode = "ValidationErr"
+			validationErrs = append(validationErrs, ve)
+		}
+	}
+	return validationErrs
+}

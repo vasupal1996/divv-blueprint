@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"divvy-go-app/internals"
+	"go-app/internals"
 	"os"
 	"os/signal"
 	"syscall"

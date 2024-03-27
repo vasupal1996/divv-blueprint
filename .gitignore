@@ -1,3 +1,4 @@
-conf
 conf/*
 .vscode/
+
+!conf/sample.json

@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"divvy-go-app/internals/config"
+	"go-app/internals/config"
 
 	"github.com/rs/zerolog"
 )
@@ -30,4 +30,11 @@ func NewDemoService(opts *DemoServiceOpts) DemoService {
 		Service: opts.Service,
 	}
 	return &ds
+}
+
+type HTTPImpl struct{}
+
+func NewHttp() HTTP {
+	h := HTTPImpl{}
+	return &h
 }

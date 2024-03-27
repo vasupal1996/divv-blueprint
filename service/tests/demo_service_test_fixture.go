@@ -1,9 +1,9 @@
-package service_test
+package test_service
 
 import (
 	"context"
-	"divvy-go-app/internals/mongodb"
-	"divvy-go-app/model"
+	"go-app/internals/mongodb"
+	"go-app/model"
 	"testing"
 	"time"
 
@@ -13,8 +13,6 @@ import (
 )
 
 var fakeUTCNow = time.Now().UTC().Truncate(time.Millisecond)
-
-// var fakeNow = time.Now().UTC().Truncate(time.Millisecond)
 
 func CreateDemoAccountWithZeroBalance(t *testing.T, coll mongodb.Collection) *model.Account {
 	m := model.Account{

@@ -1,10 +1,10 @@
-//go:generate $GOPATH/bin/mockgen -destination=../../mock/mock_mongodb.go -package=mock divvy-go-app/internals/mongodb MongoDB,Client,Database,Collection,Cursor
+//go:generate $GOPATH/bin/mockgen -destination=../../mock/mock_mongodb.go -package=mock go-app/internals/mongodb MongoDB,Client,Database,Collection,Cursor
 
 package mongodb
 
 import (
 	"context"
-	"divvy-go-app/internals/config"
+	"go-app/internals/config"
 	"sync"
 
 	"github.com/pkg/errors"
@@ -44,7 +44,6 @@ func (mdbi *MongoDBImpl) Close() error {
 	} else {
 		mdbi.Logger.Debug().Msg("mongodb connection closed")
 	}
-	// time.Sleep(1 * time.Second)
 	return err
 }
 

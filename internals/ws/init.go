@@ -2,8 +2,8 @@ package ws
 
 import (
 	"context"
-	"divvy-go-app/internals/config"
 	"fmt"
+	"go-app/internals/config"
 	"sync"
 
 	"github.com/gofiber/fiber/v2"

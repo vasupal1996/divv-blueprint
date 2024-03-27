@@ -2,15 +2,15 @@ package internals
 
 import (
 	"context"
-	"divvy-go-app/internals/config"
-	"divvy-go-app/internals/db"
-	"divvy-go-app/internals/logger"
-	"divvy-go-app/internals/mongodb"
+	"go-app/internals/config"
+	"go-app/internals/db"
+	"go-app/internals/logger"
+	"go-app/internals/mongodb"
 
-	"divvy-go-app/internals/ws"
-	"divvy-go-app/router"
-	"divvy-go-app/service"
 	"fmt"
+	"go-app/internals/ws"
+	"go-app/router"
+	"go-app/service"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/gofiber/fiber"
@@ -49,8 +49,6 @@ func (a *AppImpl) Start() {
 }
 
 func (a *AppImpl) Close() {
-	<-a.Ctx.Done()
-
 	// Closing down all the components
 	a.WebServer.Close()
 	a.Service.Close()

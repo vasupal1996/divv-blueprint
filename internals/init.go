@@ -49,8 +49,6 @@ func (a *AppImpl) Start() {
 }
 
 func (a *AppImpl) Close() {
-	<-a.Ctx.Done()
-
 	// Closing down all the components
 	a.WebServer.Close()
 	a.Service.Close()

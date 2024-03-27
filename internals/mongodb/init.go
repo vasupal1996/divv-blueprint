@@ -44,7 +44,6 @@ func (mdbi *MongoDBImpl) Close() error {
 	} else {
 		mdbi.Logger.Debug().Msg("mongodb connection closed")
 	}
-	// time.Sleep(1 * time.Second)
 	return err
 }
 

@@ -7,7 +7,7 @@ import (
 )
 
 type InsertOneOpts struct {
-	Name string `json:"name"`
+	Name string `json:"name" validate:"required,ne=LoremIpsumLoremIpsum,max=12"`
 }
 
 type Account_CreateOpts struct {

@@ -8,9 +8,9 @@
     },
     "mongo_db_config": {
         "scheme": "mongodb+srv",
-        "host": "cluster0.o0rr25f.mongodb.net",
+        "host": "localhost:27017",
         "username": "go-app-1",
-        "password": "YSVToJgFJGeh7tsg",
+        "password": "admin",
         "app-name": "goapp-app-local-1",
         "read_pref": "primary",
         "replica_set": ""
